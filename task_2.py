@@ -37,16 +37,11 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     return c * r
 
 
-def find_longest_route():
+def find_longest_route(stop_times, trips, stops):
     """Find the longest train route in terms of duration"""
     print("=" * 80)
     print("TASK 2.1: Finding the longest train route (by duration)")
     print("=" * 80)
-
-    # Load data
-    stop_times = pd.read_csv("input/stop_times.txt")
-    trips = pd.read_csv("input/trips.txt")
-    stops = pd.read_csv("input/stops.txt")
 
     # For each trip, find the first and last stop times
     trip_durations = []
@@ -115,16 +110,13 @@ def find_longest_route():
     return longest
 
 
-def find_furthest_stations():
+def find_furthest_stations(stops):
     """Find the two train stations that are furthest apart geographically"""
     print("=" * 80)
     print(
         "TASK 2.2: Finding the two train stations furthest apart (geographical distance)"
     )
     print("=" * 80)
-
-    # Load stops data
-    stops = pd.read_csv("input/stops.txt")
 
     # Clean up lat/lon data (remove extra spaces)
     stops["stop_lat"] = stops["stop_lat"].astype(str).str.strip().astype(float)
@@ -178,11 +170,17 @@ if __name__ == "__main__":
     print("SLOVAK RAILWAYS DATA ANALYSIS - TASK 2")
     print("=" * 80 + "\n")
 
+    print("Loading data files...")
+    stop_times = pd.read_csv("input/stop_times.txt")
+    trips = pd.read_csv("input/trips.txt")
+    stops = pd.read_csv("input/stops.txt")
+    print("Data loaded successfully.\n")
+
     # Task 2.1: Longest route by duration
-    longest_route = find_longest_route()
+    longest_route = find_longest_route(stop_times, trips, stops)
 
     # Task 2.2: Furthest stations by geographical distance
-    furthest_stations = find_furthest_stations()
+    furthest_stations = find_furthest_stations(stops)
 
     print("=" * 80)
     print("TASK 2 COMPLETE")

@@ -1,0 +1,34 @@
+TASK 3: Machine Learning Plan for Train Type Classification
+
+STEP 1: Feature Engineering
+----------------------------
+
+The key is figuring out what actually makes an express train different from a local train. I'd engineer features around the obvious stuff that distinguishes them.
+
+I'd grab trips.txt, normalize labels using regex, for example, and then enrich the dataset by joining across the other GTFS files to calculate these features:
+
+Number of stops - Count rows in stop_times.txt for each trip. Express trains have fewer stops.
+Trip duration - Calculate from first departure to last arrival time in stop_times.txt. InterCity trains run longer.
+Total distance - Use stop coordinates from stops.txt to calculate distance between consecutive stops, sum them up. Longer trips are usually premium services.
+Average speed - Distance divided by duration. Faster trains are typically express/premium.
+Stop spacing - Total distance divided by number of stops. Express trains have bigger gaps between stations.
+Station importance - For origin and destination, count how many total trips serve those stations across the whole network. Major hubs get high scores, small villages get low scores. IC/EC connect important cities.
+Departure hour - Extract from departure time. Tells us if it's a night train (EN) or rush hour service.
+Days operating - Join to calendar_dates.txt via service_id to count how many days per year this runs. Daily trains vs seasonal/weekend services.
+Service regularity - Look at gaps between operating dates in calendar_dates.txt. Daily service has small consistent gaps, occasional service has irregular gaps.
+
+So each row in the final training dataset would be one trip from trips.txt with all these calculated features plus the train_type label extracted from trip_short_name. About 1,975 rows with 10-12 feature columns.
+
+STEP 2: Model Selection
+------------------------
+
+I'd go with Random Forest from scikit learn as my main model. It handles this kind of problem really well because the relationships aren't linear - like, you can't just say "more than 100km means express" because there are long local routes too. It's more like "if distance is long AND stops are few AND endpoints are major cities, THEN it's express." Random Forest can learn those combinations.
+
+Plus it has built-in feature importance so we can see what actually matters, it doesn't need feature scaling, and it has a class_weight parameter to deal with the imbalanced classes. I'd set class_weight='balanced' so the model doesn't just learn to predict "Os" for everything.
+
+STEP 3: Model Evaluation
+-------------------------
+
+For splitting the data, I'd do 80/20 train/test with stratification so each class appears in both sets proportionally. With only 1975 samples and some classes having like 2-6 examples, we need to preserve as much training data as possible.
+
+The key metric is Macro F1-Score, not accuracy. Accuracy is useless here because you could get 81% accuracy by just predicting "Os" every time. Macro F1 treats all classes equally, so you actually have to learn the rare ones too.

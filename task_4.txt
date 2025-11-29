@@ -1,0 +1,58 @@
+TASK 4: Optimal Service Cuts for ZSSK
+======================================
+
+My Approach
+-----------
+
+I built a scoring system that looks at each trip from multiple angles and assigns it a "cutting score" - higher score means it's a better candidate to cut. Then we just sort by score and pick the top 98.
+
+The scoring considers seven factors:
+
+Operating frequency (25% weight) - How many days per year does this train run? A seasonal tourist train that operates 14 days a year affects way fewer people than a daily commuter service. Low frequency trains score higher for cutting.
+
+Trip duration (20% weight) - Short trips have more alternatives. If it's a 15-minute journey, people can drive or take a bus. If it's a 3-hour intercity trip, they're kind of stuck. Shorter trips score higher for cutting.
+
+Endpoint importance (20% weight) - I calculated an importance score for each station based on how many trips serve it and how many routes connect there. Major hubs like Bratislava serve tons of passengers who transfer through. Small village stations serve a handful of locals. Trips between unimportant endpoints score higher for cutting.
+
+Route redundancy (15% weight) - If there's another train on the same route within 2 hours, passengers have an alternative. Like if Station A to Station B has trains at 8:00, 8:30, and 9:00, we can cut the 8:30 one because riders can just use 8:00 or 9:00. Trips with alternatives score higher.
+
+Number of stops (10% weight) - Lots of stops usually means it's a local service with lower ridership per trip. Express trains with few stops are more valuable. More stops means higher cutting score.
+
+Peak hour penalty - If a train departs 6-9 AM or 4-7 PM, that's rush hour and commuters need it. I subtract 0.3 from the cutting score as a penalty. This basically protects all peak services.
+
+Premium train penalty - IC, EC, SC, RJ, and EN trains are premium long-distance or international services. They generate more revenue and serve travelers who don't have good alternatives. I subtract 0.5 from the cutting score as a strong penalty. This keeps premium trains off the chopping block.
+
+I weight these factors (the percentages) based on what matters most for passenger impact. Frequency matters a lot because it directly relates to total ridership. Duration and endpoints are equally important. Redundancy and stops are useful signals but secondary. Peak and premium are hard constraints.
+
+
+What I got
+---------------
+
+Total trips cut: 98 out of 1,975 (5%)
+
+We're cutting 5% of trips but only 0.88% of service days because we're targeting infrequent, short trips with alternatives. This maximizes cost savings while minimizing passenger impact.
+
+Service day reduction: 0.88% (4,926 out of 558,657 total service days)
+Operational time reduction: 0.57% (278,158 out of 48,562,610 route-minutes)
+
+Train types cut:
+- 92 Os (local trains) - 5.7% of all Os trains
+- 4 REX (regional express) - 2.3% of all REX
+- 2 RR (fast regional) - 4.3% of all RR
+- 0 premium trains (IC/EC/SC/RJ/EN)
+- 0 express trains (Ex/R)
+
+Average characteristics of cut trips:
+- Duration: 51 minutes (vs 79 minute system average)
+- Stops: 9.9 (vs 12.4 system average)
+- Days operating: 50 days/year (vs 283 system average)
+- Peak hour trips: 0 out of 98
+- Trips with alternatives (within 2 hours): 72 out of 98 (73%)
+
+Top 5 recommended cuts:
+1. Os 18212 - 16 min, 6 stops, 14 days/year, 5 alternatives
+2. Os 18114 - 94 min, 14 stops, 13 days/year, 6 alternatives
+3. Os 18221 - 16 min, 6 stops, 14 days/year, 4 alternatives
+4. Os 18217 - 16 min, 6 stops, 14 days/year, 4 alternatives
+5. Os 18222 - 16 min, 6 stops, 14 days/year, 4 alternatives
+
